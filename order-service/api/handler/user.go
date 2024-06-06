@@ -2,8 +2,10 @@ package handler
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"user/models"
 	"user/storage"
 )
@@ -40,9 +42,11 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) UpdateUserById(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("id")
+	id := strings.Split(r.URL.Path, "/")[2]
+	log.Println(id)
 	intId, err := strconv.Atoi(id)
 	if err != nil {
+		log.Println("Error 1")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -50,12 +54,14 @@ func (h *Handler) UpdateUserById(w http.ResponseWriter, r *http.Request) {
 	var body models.UserRequest
 	err = json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
+		log.Println("Error 2")
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	resp, err := h.Storage.UpdateUserById(intId, &body)
 	if err != nil {
+		log.Println("Error 3")
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -63,13 +69,14 @@ func (h *Handler) UpdateUserById(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(resp)
 	if err != nil {
+		log.Println("Error 4")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }
 
 func (h *Handler) DeleteUserByID(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("id")
+	id := strings.Split(r.URL.Path, "/")[2]
 	intId, err := strconv.Atoi(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -86,6 +93,29 @@ func (h *Handler) DeleteUserByID(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(resp)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (h *Handler) GetUserByID(w http.ResponseWriter, r *http.Request) {
+	id := strings.Split(r.URL.Path, "/")[2]
+	log.Println(id)
+	intId, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	resp, err := h.Storage.GetUserByID(intId)
+	if err != nil {
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(w).Encode(resp)
+	if err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 		return
 	}
 }

@@ -42,7 +42,7 @@ func (u *User) UpdateUserById(id int, req *models.UserRequest) (*models.UserResp
 		UPDATE users
 		SET name = $1, email = $2, age = $3
 		WHERE id = $4
-		RETURNING (id, name, email, age)
+		RETURNING id, name, email, age
 	`
 
 	row := u.DB.QueryRow(query, req.Name, req.Email, req.Age, id)
@@ -62,6 +62,25 @@ func (u *User) DeleteUserByID(id int) (*models.UserResponse, error) {
 		DELETE FROM users
 		WHERE id = $1
 		RETURNING id, name, email, age
+	`
+
+	row := u.DB.QueryRow(query, id)
+
+	var res models.UserResponse
+
+	err := row.Scan(&res.Id, &res.Name, &res.Email, &res.Age)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, err
+}
+
+func (u *User) GetUserByID(id int) (*models.UserResponse, error){
+	query := `
+		SELECT id, name, email, age 
+		FROM users
+		WHERE id = $1
 	`
 
 	row := u.DB.QueryRow(query, id)
