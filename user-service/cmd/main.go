@@ -83,13 +83,6 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Fprintf(w, "The result is %s\n", body)
-
-	// w.Header().Set("Content-Type", "application/json")
-	// err = json.NewEncoder(w).Encode(body)
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 	return
-	// }
 }
 
 func updateHandler(w http.ResponseWriter, r *http.Request) {

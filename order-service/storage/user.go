@@ -92,5 +92,5 @@ func (u *User) GetUserByID(id int) (*models.UserResponse, error){
 		return nil, err
 	}
 
-	return &res, err
+	return &res, nil
 }
